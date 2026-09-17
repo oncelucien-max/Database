@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ table }} | DB Admin{% endblock %}
+{% block content %}
+  <div class="actions" style="margin-bottom: 20px"><a href="{{ url_for('index') }}">&larr; All tables</a></div>
+  <div class="eyebrow">Table</div>
+  <h1>{{ table }}</h1>
+  <p class="intro">{{ total }} row{% if total != 1 %}s{% endif %} · page {{ page }} of {{ pages }}</p>
+
+  <section class="panel" style="margin-bottom: 22px">
+    <div class="panel-head"><h2>Insert row</h2></div>
+    <form class="form-grid" method="post" action="{{ url_for('table_insert', table=table) }}">
+      {% for column in columns %}
+        <label>{{ column.column_name }}{% if column.is_nullable == 'YES' %} <span>(optional)</span>{% endif %}
+          <input name="{{ column.column_name }}"{% if column.column_name == pk and column.column_default %} placeholder="Generated automatically"{% endif %}>
+        </label>
+      {% endfor %}
+      <div style="align-self: end"><button class="button" type="submit">Insert row</button></div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Rows</h2><span class="meta">{{ columns|length }} columns</span></div>
+    {% if rows %}
+      <div class="table-wrap"><table>
+        <thead><tr>{% for column in columns %}<th>{{ column.column_name }}</th>{% endfor %}<th>Actions</th></tr></thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              {% for column in columns %}<td>{{ row[column.column_name] }}</td>{% endfor %}
+              <td><div class="actions">
+                {% if pk %}<a class="button secondary" href="#edit-{{ row[pk] }}">Edit</a>
+                <form class="inline" method="post" action="{{ url_for('table_delete', table=table, pk_value=row[pk]) }}"><button class="danger" type="submit">Delete</button></form>{% endif %}
+              </div></td>
+            </tr>
+            {% if pk %}<tr id="edit-{{ row[pk] }}"><td colspan="{{ columns|length + 1 }}">
+              <form class="form-grid" method="post" action="{{ url_for('table_update', table=table, pk_value=row[pk]) }}">
+                {% for column in columns if column.column_name != pk %}<label>{{ column.column_name }}<input name="{{ column.column_name }}" value="{{ row[column.column_name] }}"></label>{% endfor %}
+                <div style="align-self: end"><button class="button" type="submit">Save changes</button></div>
+              </form>
+            </td></tr>{% endif %}
+          {% endfor %}
+        </tbody>
+      </table></div>
+      <div class="pagination">
+        {% if page > 1 %}<a href="{{ url_for('table_detail', table=table, page=page - 1) }}">&larr; Previous</a>{% else %}<span></span>{% endif %}
+        {% if page < pages %}<a href="{{ url_for('table_detail', table=table, page=page + 1) }}">Next &rarr;</a>{% endif %}
+      </div>
+    {% else %}<div class="empty">This table has no rows.</div>{% endif %}
+  </section>
+{% endblock %}
