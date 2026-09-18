@@ -1,0 +1,11 @@
+{
+  "appId": "com.tondomaine.dbadmin",
+  "appName": "DB Admin",
+  "webDir": "www",
+  "server": {
+    "url": "https://ton-domaine-prod.example.com",
+    "cleartext": false
+  },
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "automatic" }
+}
